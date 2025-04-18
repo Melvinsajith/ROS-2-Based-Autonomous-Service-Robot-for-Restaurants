@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ROS 2 Control Hardware Interface -->
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+
+    <!-- Front Left Wheel Joint -->
+    <joint name="front_left_joint">
+      <command_interface name="velocity">
+        <param name="min">-10.0</param>
+        <param name="max">10.0</param>
+      </command_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="position"/>
+    </joint>
+
+    <!-- Front Right Wheel Joint -->
+    <joint name="front_right_joint">
+      <command_interface name="velocity">
+        <param name="min">-10.0</param>
+        <param name="max">10.0</param>
+      </command_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="position"/>
+    </joint>
+
+    <!-- Rear Left Wheel Joint -->
+    <joint name="rear_left_joint">
+      <command_interface name="velocity">
+        <param name="min">-10.0</param>
+        <param name="max">10.0</param>
+      </command_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="position"/>
+    </joint>
+
+    <!-- Rear Right Wheel Joint -->
+    <joint name="rear_right_joint">
+      <command_interface name="velocity">
+        <param name="min">-10.0</param>
+        <param name="max">10.0</param>
+      </command_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="position"/>
+    </joint>
+  </ros2_control>
+
+  <!-- Gazebo Plugin Configuration -->
+  <gazebo>
+    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+      <!-- Controller configuration file -->
+      <parameters>$(find restaurant_robot)/config/my_controllers.yaml</parameters>
+      
+      <!-- Robot description (URDF/Xacro file) -->
+      <robot_description>restaurant_robot_4wd.xacro</robot_description>
+      
+      <!-- Simulation type -->
+      <robot_sim_type>gazebo_ros2_control/GazeboSystem</robot_sim_type>
+      
+      <!-- Use simulation time -->
+      <use_sim_time>true</use_sim_time>
+    </plugin>
+  </gazebo>
+
+</robot>

@@ -1,0 +1,33 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 1000  # Match Gazebo’s update period
+    use_sim_time: true
+
+    diff_cont:
+      type: diff_drive_controller/DiffDriveController
+
+    joint_broad:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+diff_cont:
+  ros__parameters:
+    publish_rate: 50.0
+    base_frame_id: base_footprint
+
+    # Use all four wheel joints for 4WD
+    left_wheel_names: ["front_left_joint", "rear_left_joint"]
+    right_wheel_names: ["front_right_joint", "rear_right_joint"]
+
+    wheel_separation: 0.5  # meters (y-distance between left and right wheels)
+    wheel_radius: 0.15     # meters (from URDF)
+
+    use_stamped_vel: false
+    cmd_vel_timeout: 0.5   # Timeout for velocity commands
+    enable_odom_tf: true
+    odom_frame_id: odom
+    pose_covariance_diagonal: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    twist_covariance_diagonal: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+
+    # Input topic
+    cmd_vel_topic: "/cmd_vel"
+    publish_cmd: true

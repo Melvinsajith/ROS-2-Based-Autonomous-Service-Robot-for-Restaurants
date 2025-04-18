@@ -1,0 +1,447 @@
+<?xml version="1.0"?>
+<robot name="restaurant_robot_4wd" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Colors -->
+  <material name="white"><color rgba="1 1 1 1"/></material>
+  <material name="grey"><color rgba="0.5 0.5 0.5 1"/></material>
+  <material name="black"><color rgba="0 0 0 1"/></material>
+  <material name="green"><color rgba="0 0.6 0 1"/></material>
+
+  <!-- Body dimensions -->
+  <xacro:property name="body_link_x_dim" value="0.5"/>
+  <xacro:property name="body_link_y_dim" value="0.4"/>
+  <xacro:property name="body_link_z_dim" value="0.05"/>
+
+  <!-- Wheel dimensions -->
+  <xacro:property name="wheel_link_radius" value="0.15"/>
+  <xacro:property name="wheel_link_length" value="0.1"/>
+  <xacro:property name="wheel_link_z_location" value="-0.1"/>
+
+  <!-- Material Density -->
+  <xacro:property name="body_density" value="2710.0"/>
+  <xacro:property name="wheel_density" value="2710.0"/>
+
+  <!-- Pi Constant -->
+  <xacro:property name="pi_const" value="3.141592265"/>
+
+  <!-- Mass Calculations -->
+  <xacro:property name="body_mass" value="${body_density*body_link_x_dim*body_link_y_dim*body_link_z_dim}"/>
+  <xacro:property name="wheel_mass" value="${wheel_density*pi_const*wheel_link_radius*wheel_link_radius*wheel_link_length}"/>
+
+  <!-- Moments of Inertia for Wheels -->
+  <xacro:property name="Iz_wheel" value="${0.5*wheel_mass*wheel_link_radius*wheel_link_radius}"/>
+  <xacro:property name="I_wheel" value="${(1.0/12.0)*wheel_mass*(3*wheel_link_radius*wheel_link_radius+wheel_link_length*wheel_link_length)}"/>
+
+  <!-- Inertia Macro -->
+  <xacro:macro name="inertia_wheel">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="${wheel_mass}"/>
+      <inertia ixx="${I_wheel}" ixy="0.0" ixz="0.0" iyy="${I_wheel}" iyz="0" izz="${Iz_wheel}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- Base Footprint -->
+
+
+    <link name="base_footprint">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      
+  </link>
+
+
+
+
+  <!-- Base Link -->
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0.2"/>
+  </joint>
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${body_link_x_dim} ${body_link_y_dim} ${body_link_z_dim}"/>
+      </geometry>
+      <material name="green"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${body_link_x_dim} ${body_link_y_dim} ${body_link_z_dim}"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="${body_mass}"/>
+      <inertia
+        ixx="${(1/12)*body_mass*(body_link_y_dim*body_link_y_dim+body_link_z_dim*body_link_z_dim)}"
+        ixy="0" ixz="0"
+        iyy="${(1/12)*body_mass*(body_link_x_dim*body_link_x_dim+body_link_z_dim*body_link_z_dim)}"
+        iyz="0"
+        izz="${(1/12)*body_mass*(body_link_y_dim*body_link_y_dim+body_link_x_dim*body_link_x_dim)}"/>
+    </inertial>
+  </link>
+  <gazebo reference="base_link">
+    <material>Gazebo/Green</material>
+  </gazebo>
+
+  <!-- Front Left Wheel -->
+  <joint name="front_left_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="front_left_wheel"/>
+    <origin xyz="${body_link_x_dim/2} ${body_link_y_dim/2 + wheel_link_length/2} ${wheel_link_z_location}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="1000" velocity="1000"/>
+    <dynamics damping="0.1" friction="1.0"/>
+  </joint>
+  <link name="front_left_wheel">
+    <visual>
+      <origin rpy="1.570795 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="${wheel_link_length}" radius="${wheel_link_radius}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin rpy="1.570795 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="${wheel_link_radius}"/>
+      </geometry>
+      <surface>
+        <friction>
+          <ode><mu>0.5</mu><mu2>0.5</mu2></ode>
+        </friction>
+        <contact>
+          <ode><kp>1000.0</kp><kd>10.0</kd></ode>
+        </contact>
+      </surface>
+    </collision>
+    <xacro:inertia_wheel/>
+  </link>
+  <gazebo reference="front_left_wheel">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <!-- Front Right Wheel -->
+  <joint name="front_right_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="front_right_wheel"/>
+    <origin xyz="${body_link_x_dim/2} ${-body_link_y_dim/2 - wheel_link_length/2} ${wheel_link_z_location}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="1000" velocity="1000"/>
+    <dynamics damping="0.1" friction="1.0"/>
+  </joint>
+  <link name="front_right_wheel">
+    <visual>
+      <origin rpy="1.570795 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="${wheel_link_length}" radius="${wheel_link_radius}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin rpy="1.570795 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere  radius="${wheel_link_radius}"/>
+      </geometry>
+      <surface>
+        <friction>
+          <ode><mu>0.5</mu><mu2>0.5</mu2></ode>
+        </friction>
+        <contact>
+          <ode><kp>1000.0</kp><kd>10.0</kd></ode>
+        </contact>
+      </surface>
+    </collision>
+    <xacro:inertia_wheel/>
+  </link>
+  <gazebo reference="front_right_wheel">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <!-- Rear Left Wheel -->
+  <joint name="rear_left_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_left_wheel"/>
+    <origin xyz="${-body_link_x_dim/2} ${body_link_y_dim/2 + wheel_link_length/2} ${wheel_link_z_location}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="1000" velocity="1000"/>
+    <dynamics damping="0.1" friction="1.0"/>
+  </joint>
+  <link name="rear_left_wheel">
+    <visual>
+      <origin rpy="1.570795 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="${wheel_link_length}" radius="${wheel_link_radius}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin rpy="1.570795 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere  radius="${wheel_link_radius}"/>
+      </geometry>
+      <surface>
+        <friction>
+          <ode><mu>0.5</mu><mu2>0.5</mu2></ode>
+        </friction>
+        <contact>
+          <ode><kp>1000.0</kp><kd>10.0</kd></ode>
+        </contact>
+      </surface>
+    </collision>
+    <xacro:inertia_wheel/>
+  </link>
+  <gazebo reference="rear_left_wheel">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <!-- Rear Right Wheel -->
+  <joint name="rear_right_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_right_wheel"/>
+    <origin xyz="${-body_link_x_dim/2} ${-body_link_y_dim/2 - wheel_link_length/2} ${wheel_link_z_location}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="1000" velocity="1000"/>
+    <dynamics damping="0.1" friction="1.0"/>
+  </joint>
+  <link name="rear_right_wheel">
+    <visual>
+      <origin rpy="1.570795 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="${wheel_link_length}" radius="${wheel_link_radius}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin rpy="1.570795 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="${wheel_link_radius}"/>
+      </geometry>
+      <surface>
+        <friction>
+          <ode><mu>0.5</mu><mu2>0.5</mu2></ode>
+        </friction>
+        <contact>
+          <ode><kp>1000.0</kp><kd>10.0</kd></ode>
+        </contact>
+      </surface>
+    </collision>
+    <xacro:inertia_wheel/>
+  </link>
+  <gazebo reference="rear_right_wheel">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <!-- Middle Platform -->
+  <link name="middle_platform">
+    <visual>
+      <geometry>
+        <box size="${body_link_x_dim} ${body_link_y_dim} ${body_link_z_dim}"/>
+      </geometry>
+      <material name="green"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${body_link_x_dim} ${body_link_y_dim} ${body_link_z_dim}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.005" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.005"/>
+    </inertial>
+  </link>
+  <gazebo reference="middle_platform">
+    <material>Gazebo/Green</material>
+  </gazebo>
+  <joint name="middle_platform_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="middle_platform"/>
+    <origin rpy="0 0 0" xyz="0 0 0.3"/>
+  </joint>
+
+  <!-- Top Platform -->
+  <link name="top_platform">
+    <visual>
+      <geometry>
+        <box size="${body_link_x_dim} ${body_link_y_dim} ${body_link_z_dim}"/>
+      </geometry>
+      <material name="green"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${body_link_x_dim} ${body_link_y_dim} ${body_link_z_dim}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.005" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.005"/>
+    </inertial>
+  </link>
+  <gazebo reference="top_platform">
+    <material>Gazebo/Green</material>
+  </gazebo>
+  <joint name="top_platform_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="top_platform"/>
+    <origin rpy="0 0 0" xyz="0 0 0.6"/>
+  </joint>
+
+  <!-- Support Rods -->
+  <link name="support_rod_1">
+    <visual>
+      <geometry>
+        <cylinder length="0.63" radius="0.01"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.63" radius="0.01"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="support_rod_1_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="support_rod_1"/>
+    <origin rpy="0 0 0" xyz="0.23 0.18 0.3"/>
+  </joint>
+  <link name="support_rod_2">
+    <visual>
+      <geometry>
+        <cylinder length="0.63" radius="0.01"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.63" radius="0.01"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="support_rod_2_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="support_rod_2"/>
+    <origin rpy="0 0 0" xyz="-0.23 0.18 0.3"/>
+  </joint>
+  <link name="support_rod_3">
+    <visual>
+      <geometry>
+        <cylinder length="0.63" radius="0.01"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.63" radius="0.01"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="support_rod_3_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="support_rod_3"/>
+    <origin rpy="0 0 0" xyz="0.23 -0.18 0.3"/>
+  </joint>
+  <link name="support_rod_4">
+    <visual>
+      <geometry>
+        <cylinder length="0.63" radius="0.01"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.63" radius="0.01"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="support_rod_4_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="support_rod_4"/>
+    <origin rpy="0 0 0" xyz="-0.23 -0.18 0.3"/>
+  </joint>
+
+  <!-- LiDAR Sensor -->
+  <link name="lidar">
+    <visual>
+      <geometry>
+        <cylinder radius="0.03" length="0.04"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.03" length="0.04"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+  <gazebo reference="lidar">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar"/>
+    <origin xyz="0 0 0.04" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Display Screen -->
+  <link name="display">
+    <visual>
+      <geometry>
+        <box size="0.2 0.1 0.02"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.2 0.1 0.02"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/>
+    </inertial>
+  </link>
+  <gazebo reference="display">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <joint name="display_joint" type="fixed">
+    <parent link="top_platform"/>
+    <child link="display"/>
+    <origin xyz="0 0.2 -0.05" rpy="2 0 0"/>
+  </joint>
+
+  <!-- Camera -->
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.010 0.03 0.03"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="camera_joint" type="fixed">
+    <parent link="top_platform"/>
+    <child link="camera_link"/>
+    <origin xyz="0.15 0 0.04" rpy="0 0 0"/>
+  </joint>
+  <gazebo reference="camera_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <link name="camera_link_optical"/>
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_link_optical"/>
+    <origin xyz="0 0 0" rpy="${-pi_const/2} 0 ${-pi_const/2}"/>
+  </joint>
+
+</robot>
