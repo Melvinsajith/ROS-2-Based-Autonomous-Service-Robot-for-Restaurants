@@ -4,7 +4,7 @@
   <name>nav_locations_restaurant</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="melvin@todo.todo">melvin</maintainer>
+  <maintainer email="melvinsajith20@gmail.com">melvin</maintainer>
   <license>TODO: License declaration</license>
 
   <depend>rclpy</depend>
